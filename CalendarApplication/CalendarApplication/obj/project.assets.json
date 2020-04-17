@@ -233,11 +233,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\AdrianSeverinJensen\\source\\repos\\private-projects-master\\CalendarApplication\\CalendarApplication\\CalendarApplication.csproj",
+      "projectUniqueName": "C:\\Users\\AdrianSeverinJensen\\source\\repos\\private-projects\\CalendarApplication\\CalendarApplication\\CalendarApplication.csproj",
       "projectName": "CalendarApplication",
-      "projectPath": "C:\\Users\\AdrianSeverinJensen\\source\\repos\\private-projects-master\\CalendarApplication\\CalendarApplication\\CalendarApplication.csproj",
+      "projectPath": "C:\\Users\\AdrianSeverinJensen\\source\\repos\\private-projects\\CalendarApplication\\CalendarApplication\\CalendarApplication.csproj",
       "packagesPath": "C:\\Users\\AdrianSeverinJensen\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\AdrianSeverinJensen\\source\\repos\\private-projects-master\\CalendarApplication\\CalendarApplication\\obj\\",
+      "outputPath": "C:\\Users\\AdrianSeverinJensen\\source\\repos\\private-projects\\CalendarApplication\\CalendarApplication\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

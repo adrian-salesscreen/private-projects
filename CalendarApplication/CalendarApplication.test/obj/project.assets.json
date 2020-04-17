@@ -5114,11 +5114,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\AdrianSeverinJensen\\source\\repos\\private-projects-master\\CalendarApplication\\CalendarApplication.test\\CalendarApplication.test.csproj",
+      "projectUniqueName": "C:\\Users\\AdrianSeverinJensen\\source\\repos\\private-projects\\CalendarApplication\\CalendarApplication.test\\CalendarApplication.test.csproj",
       "projectName": "CalendarApplication.test",
-      "projectPath": "C:\\Users\\AdrianSeverinJensen\\source\\repos\\private-projects-master\\CalendarApplication\\CalendarApplication.test\\CalendarApplication.test.csproj",
+      "projectPath": "C:\\Users\\AdrianSeverinJensen\\source\\repos\\private-projects\\CalendarApplication\\CalendarApplication.test\\CalendarApplication.test.csproj",
       "packagesPath": "C:\\Users\\AdrianSeverinJensen\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\AdrianSeverinJensen\\source\\repos\\private-projects-master\\CalendarApplication\\CalendarApplication.test\\obj\\",
+      "outputPath": "C:\\Users\\AdrianSeverinJensen\\source\\repos\\private-projects\\CalendarApplication\\CalendarApplication.test\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -5137,8 +5137,8 @@
       "frameworks": {
         "netcoreapp3.1": {
           "projectReferences": {
-            "C:\\Users\\AdrianSeverinJensen\\source\\repos\\private-projects-master\\CalendarApplication\\CalendarApplication\\CalendarApplication.csproj": {
-              "projectPath": "C:\\Users\\AdrianSeverinJensen\\source\\repos\\private-projects-master\\CalendarApplication\\CalendarApplication\\CalendarApplication.csproj"
+            "C:\\Users\\AdrianSeverinJensen\\source\\repos\\private-projects\\CalendarApplication\\CalendarApplication\\CalendarApplication.csproj": {
+              "projectPath": "C:\\Users\\AdrianSeverinJensen\\source\\repos\\private-projects\\CalendarApplication\\CalendarApplication\\CalendarApplication.csproj"
             }
           }
         }
