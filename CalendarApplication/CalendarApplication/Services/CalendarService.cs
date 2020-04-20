@@ -13,84 +13,75 @@ namespace CalendarApplication.Services
         private readonly ICalendarInterface _interface;
         private readonly IDatabaseAccessor _context;
 
-        public CalendarService(ICalendarInterface calendarInterface)
+
+        public CalendarService(ICalendarInterface calendarInterface, 
+            string filePath = "Constants\\CalendarEntries.json")
         {
-            _context = new DatabaseAccessor();
-            _entries = _context.InitializeEntries("Constants\\CalendarEntries.json");
+            _context = new DatabaseAccessor(filePath);
+            _entries = _context.FetchEntries();
             _interface = calendarInterface;
         }
 
-        public void PerformAction(MenuAction action)
-        {
-            switch (action)
-            {
-                case MenuAction.AddEntry:
-                     AddEntries();
-                     break;
-                case MenuAction.DeleteEntry:
-                    DeleteEntries();
-                    break;
-                case MenuAction.ListEntries:
-                    ListEntriesByRange();
-                    break;
-                case MenuAction.Exit:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(action), action, "Action is invalid\n");
-            }
-        }
-
-        private void AddEntries()
+        public void AddEntry(string entryDate = null,
+            string description = null, string defaultInput = null)
         {
             var isFinished = false;
             while (!isFinished)
             {
-                Console.WriteLine("Please provide a date for your entry. Valid format is dd/MM/yy HH:mm\n");
+                Console.WriteLine("\nPlease provide a date for your entry. Valid format is dd/MM/yy HH:mm\n");
 
-                var entryDate = _interface.GetInput();
-                if (DateTimeExtensions.ValidateDate(entryDate) == null) continue;
-                
-                if (Convert.ToDateTime(entryDate) < DateTime.Now)
+                var inputDate = entryDate ?? _interface.GetInput();
+                var formattedDate = DateTimeExtensions.ValidateDate(inputDate);
+
+                if (formattedDate == null || EntryExists(formattedDate))
                 {
-                    Console.WriteLine("Date must be later than current date \n");
-                    continue;
+                    if (entryDate == null) continue;
+                    break;
                 }
 
-                Console.WriteLine("Description: ");
-                var description = _interface.GetInput();
+                if (Convert.ToDateTime(formattedDate) < DateTime.Now)
+                {
+                    Console.WriteLine("\nDate must be later than current date\n");
+
+                    if (entryDate == null) continue;
+                    break;
+                }
+
+                Console.WriteLine("Description:\n");
+                description ??= _interface.GetInput();
 
                 while (string.IsNullOrEmpty(description))
                 { 
-                    Console.WriteLine("Please provide a description or press 'd' to exit:\n");
-                    description = _interface.GetInput();
-                    if (description?.ToLower() == "d") return;
+                    Console.WriteLine("\nPlease provide a description or press 'd' to exit:\n");
+
+                    var input = defaultInput ?? _interface.GetInput();
+                    if (input.ToLower() == "d") return;
+                    if (defaultInput != null) break;
                 }
 
                 _entries.Add(new CalendarEntry
                 {
-                    Date = entryDate,
+                    Date = formattedDate,
                     Description = description
                 });
-
-                if (_interface.RepeatAction("Would you like to add more entries?\n")) continue;
 
                 _context.SaveChanges(_entries);
                 isFinished = true;
             }
         }
 
-        private void DeleteEntries()
+        public void DeleteEntry(string entryDate = null, string defaultInput = null)
         {
             var isFinished = false;
             while (!isFinished)
             {
-                Console.WriteLine("If you would like a list of all available entires, press 'L'.\n" +
-                                  "Please input the date and time of the desired entry: \n");
+                Console.WriteLine("\nIf you would like a list of all available entires, press 'L'.\n" +
+                                  "Please input the date and time of the desired entry:\n");
 
-                var inputDate = _interface.GetInput();
+                var inputDate = entryDate ?? _interface.GetInput();
                 if (inputDate.ToLower() == "l")
                 {
-                    PrintList(_entries);
+                    _interface.PrintList(_entries);
                     continue;
                 }
 
@@ -99,80 +90,65 @@ namespace CalendarApplication.Services
                 var entry = _entries.FirstOrDefault(x => x.Date == dateOfEntry);
                 if (entry == null)
                 {
-                    Console.WriteLine("There is no calendar entry with this date or the format was wrong. Please input a valid date or press 'd' to return\n");
+                    Console.WriteLine("\nThere is no calendar entry with this date or the format was wrong. Please input a valid date or press 'd' to return\n");
 
-                    var input = _interface.GetInput();
+                    var input = defaultInput ?? _interface.GetInput();
                     if (input.ToLower() == "d") return;
-
                     continue;
                 }
 
                 _entries.Remove(entry);
-                Console.WriteLine("Entry was found and deleted\n");
+                Console.WriteLine("\nEntry was found and deleted\n");
 
-                if (_interface.RepeatAction("Would you like to delete more entries?\n")) continue;
-                
                 _context.SaveChanges(_entries);
                 isFinished = true;
             }
         }
 
-        private void ListEntriesByRange()
+        public void GetEntriesByDateRange()
         {
             if (!_entries.Any())
             {
-                Console.WriteLine("Calendar contains no entries\n");
+                Console.WriteLine("\nCalendar contains no entries\n");
                 return;
             }
 
+            var result = new List<CalendarEntry>();
             var isFinished = false;
             while (!isFinished)
             {
-                Console.WriteLine("Please input a valid date range." +
+                Console.WriteLine("\nPlease input a valid date range." +
                                   "\n" +
                                   "Valid format is: dd/MM/yy HH:mm - dd/MM/yy HH:mm." +
-                                  "Example: 09/05/20 10:15 - 12/05/20 10:15\n");
+                                  "Example: 09/05/20 10:15-12/05/20 10:15\n");
 
-                var date = _interface.GetInput().Trim();
-                if (string.IsNullOrEmpty(date)) continue;
+                var input = _interface.GetInput().Trim();
+                if (string.IsNullOrEmpty(input)) continue;
 
-                var dateList = date.Split("-");
-                if (dateList.Length > 2)
-                {
-                    Console.WriteLine("Invalid format. Please try again\n");
-                    continue;
-                }
+                var dateList = input.Split("-");
 
-                if (DateTimeExtensions.ValidateDate(dateList.FirstOrDefault()) == null) continue;
-                var dateFrom = Convert.ToDateTime(dateList.FirstOrDefault());
+                var dateRange = DateTimeExtensions.ValidateDateRange(dateList);
+                if (dateRange == null && _interface.GetInput() == "d") break;
+                if (dateRange == null) continue;
+                
+                Array.Sort(dateRange);
+                _interface.PrintList(_entries.Where(x =>
+                    Convert.ToDateTime(x.Date) >= dateRange[0] &&
+                    Convert.ToDateTime(x.Date) < dateRange[1]).ToList()); 
 
-                if (DateTimeExtensions.ValidateDate(dateList.LastOrDefault()) == null) continue;
-                var dateTo = Convert.ToDateTime(dateList.LastOrDefault());
-
-                if (dateFrom > dateTo)
-                {
-                    Console.WriteLine("The initial date cannot be later than the last date. Please input a valid date range\n");
-                    continue;
-                }
-
-                var result = _entries.Where(x => 
-                    Convert.ToDateTime(x.Date) >= dateFrom && 
-                    Convert.ToDateTime(x.Date) < dateTo).ToList();
-
-                PrintList(result);
-
-                Console.WriteLine("Press 'd' to return\n");
+                Console.WriteLine("\nPress 'd' to return\n");
                 isFinished = _interface.GetInput() == "d";
             }
         }
 
-        private void PrintList(List<CalendarEntry> entries)
+        private bool EntryExists(string formattedDate)
         {
-            entries.OrderBy(x => x.Date)
-                .ToList()
-                .ForEach(x =>
-                Console.WriteLine($"\n{x.Date}\n" +
-                                  $"{x.Description}\n"));
+            if (!_entries.Select(x => x.Date).Contains(formattedDate)) return false;
+            Console.WriteLine("A calendar entry with this date already exists");
+
+            return true;
         }
+
+        
     }
 }

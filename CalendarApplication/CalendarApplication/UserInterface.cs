@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using CalendarApplication.Models;
 using CalendarApplication.Services;
 
@@ -7,27 +10,22 @@ namespace CalendarApplication
     public interface ICalendarInterface
     {
         void Start();
-        bool RepeatAction(string question);
-        string GetInput();
+        bool RepeatAction(string question, string input = null);
+        string GetInput(string input = null);
+        void PrintList(List<CalendarEntry> entries);
     }
 
     public class CalendarUserInterface : ICalendarInterface
     {
-        private CalendarService _calendar;
-        private MenuAction _action;
-
-        public CalendarUserInterface()
-        {
-            _calendar = new CalendarService(this);
-        }
-
         public void Start()
         {
+            var calendarService = new CalendarService(this);
+            string input;
             do
             {
                 PrintWelcomeMessage();
                 
-                var input = GetInput();
+                input = GetInput();
                 if (input == null)
                 {
                     PrintInvalidInputMessage();
@@ -37,38 +35,37 @@ namespace CalendarApplication
                 switch (input.ToLower())
                 {
                     case "a":
-                        _action = MenuAction.AddEntry;
+                        do
+                        {
+                            calendarService.AddEntry();
+                        } while (RepeatAction("Would you like to add more entries?"));
                         break;
+
                     case "b":
-                        _action = MenuAction.DeleteEntry;
+                        do
+                        {
+                            calendarService.DeleteEntry();
+                        } while (RepeatAction("Would you like to delete more entries?"));
                         break;
+
                     case "c":
-                        _action = MenuAction.ListEntries;
+                        calendarService.GetEntriesByDateRange();
                         break;
                     case "d":
-                        _action = MenuAction.Exit;
+                        PrintTerminationMessage();
                         break;
                     default: PrintInvalidInputMessage(); continue;
                 }
 
-                if (_action == MenuAction.Exit)
-                {
-                    PrintTerminationMessage();
-                    break;
-                }
-
-                _calendar.PerformAction(_action);
-
-            } while (_action != MenuAction.Exit);
+            } while (input?.ToLower() != "d");
         }
 
-        public bool RepeatAction(string question)
+        public bool RepeatAction(string question, string input = null)
         {
             Console.WriteLine(question + "y/n \n");
 
-            string input;
             do {
-                input = GetInput();
+                input ??= GetInput();
                 switch (input)
                 {
                     case "y":
@@ -84,9 +81,18 @@ namespace CalendarApplication
             return false;
         }
 
-        public string GetInput()
+        public void PrintList(List<CalendarEntry> entries)
         {
-            return Console.ReadLine();
+            entries.OrderBy(x => x.Date)
+                .ToList()
+                .ForEach(x =>
+                    Console.WriteLine($"\n{x.Date}\n" +
+                                      $"{x.Description}\n"));
+        }
+
+        public string GetInput(string input = null)
+        {
+            return input ?? Console.ReadLine();
         }
 
         private void PrintWelcomeMessage()

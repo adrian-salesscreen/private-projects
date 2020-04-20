@@ -8,18 +8,25 @@ namespace CalendarApplication.DAL
 {
     public interface IDatabaseAccessor
     {
-        List<CalendarEntry> InitializeEntries(string path);
+        List<CalendarEntry> FetchEntries();
         void SaveChanges(List<CalendarEntry> entryList);
     }
 
     public class DatabaseAccessor : IDatabaseAccessor
     {
-        public List<CalendarEntry> InitializeEntries(string path)
+        private readonly string _path;
+
+        public DatabaseAccessor(string filePath)
+        {
+            _path = filePath;
+        }
+
+        public List<CalendarEntry> FetchEntries()
         {
             var placeHolder = new List<CalendarEntry>();
-            if (!File.Exists($"Constants\\CalendarEntries.json")) return placeHolder;
+            if (!File.Exists(_path)) return placeHolder;
 
-            var json = File.ReadAllText("Constants\\calendarEntries.json");
+            var json = File.ReadAllText(_path);
             if (string.IsNullOrEmpty(json)) return placeHolder;
 
             return JsonConvert.DeserializeObject<List<CalendarEntry>>(json) ?? placeHolder;
@@ -30,9 +37,9 @@ namespace CalendarApplication.DAL
             try
             {
                 var json = JsonConvert.SerializeObject(entryList, Formatting.Indented);
-                File.WriteAllText($"Constants\\CalendarEntries.json", json);
+                File.WriteAllText(_path, json);
 
-                Console.WriteLine("Success!");
+                Console.WriteLine("Success!\n");
             }
             catch (DirectoryNotFoundException dirNotFoundException)
             {
